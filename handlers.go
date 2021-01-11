@@ -203,12 +203,12 @@ func (server *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
 func (server *Server) handleAuthToken(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/javascript")
 	// @TODO hashing?
-	w.Write([]byte("var gttyd_auth_token = '" + server.options.Credential + "';"))
+	w.Write([]byte("var gotty_auth_token = '" + server.options.Credential + "';"))
 }
 
 func (server *Server) handleConfig(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/javascript")
-	w.Write([]byte("var gttyd_term = '" + server.options.Term + "';"))
+	w.Write([]byte("var gotty_term = '" + server.options.Term + "';"))
 }
 
 // titleVariables merges maps in a specified order.
