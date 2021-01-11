@@ -14,13 +14,13 @@ import (
 	"time"
 
 	"github.com/NYTimes/gziphandler"
-	"github.com/elazarl/go-bindata-assetfs"
+	assetfs "github.com/elazarl/go-bindata-assetfs"
 	"github.com/gorilla/websocket"
 	"github.com/pkg/errors"
 
 	"github.com/dolfly/gtty/pkg/homedir"
 	"github.com/dolfly/gtty/pkg/randomstring"
-	"github.com/dolfly/gtty/webtty"
+	"github.com/dolfly/gtty/pkg/webtty"
 )
 
 // Server provides a webtty HTTP endpoint.

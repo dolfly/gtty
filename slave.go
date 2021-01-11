@@ -1,7 +1,7 @@
 package gtty
 
 import (
-	"github.com/dolfly/gtty/webtty"
+	"github.com/dolfly/gtty/pkg/webtty"
 )
 
 // Slave is webtty.Slave with some additional methods.
