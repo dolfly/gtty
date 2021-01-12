@@ -1,21 +1,23 @@
 package localcommand
 
 import (
-	"os"
+	"fmt"
 	"os/exec"
 	"syscall"
 	"time"
-	"unsafe"
 
-	"github.com/creack/pty"
+	"github.com/dolfly/pty"
 	"github.com/pkg/errors"
 )
 
 const (
-	DefaultCloseSignal  = syscall.SIGINT
+	// DefaultCloseSignal DefaultCloseSignal
+	DefaultCloseSignal = syscall.SIGINT
+	// DefaultCloseTimeout DefaultCloseTimeout
 	DefaultCloseTimeout = 10 * time.Second
 )
 
+// LocalCommand LocalCommand
 type LocalCommand struct {
 	command string
 	argv    []string
@@ -24,10 +26,11 @@ type LocalCommand struct {
 	closeTimeout time.Duration
 
 	cmd       *exec.Cmd
-	pty       *os.File
+	pty       pty.Pty
 	ptyClosed chan struct{}
 }
 
+// New New
 func New(command string, argv []string, options ...Option) (*LocalCommand, error) {
 	cmd := exec.Command(command, argv...)
 
@@ -76,6 +79,7 @@ func (lcmd *LocalCommand) Write(p []byte) (n int, err error) {
 	return lcmd.pty.Write(p)
 }
 
+// Close Close
 func (lcmd *LocalCommand) Close() error {
 	if lcmd.cmd != nil && lcmd.cmd.Process != nil {
 		lcmd.cmd.Process.Signal(lcmd.closeSignal)
@@ -90,6 +94,7 @@ func (lcmd *LocalCommand) Close() error {
 	}
 }
 
+// WindowTitleVariables WindowTitleVariables
 func (lcmd *LocalCommand) WindowTitleVariables() map[string]interface{} {
 	return map[string]interface{}{
 		"command": lcmd.command,
@@ -98,29 +103,20 @@ func (lcmd *LocalCommand) WindowTitleVariables() map[string]interface{} {
 	}
 }
 
+// ResizeTerminal ResizeTerminal
 func (lcmd *LocalCommand) ResizeTerminal(width int, height int) error {
-	window := struct {
-		row uint16
-		col uint16
-		x   uint16
-		y   uint16
-	}{
-		uint16(height),
-		uint16(width),
-		0,
-		0,
+	rows, cols, err := pty.Getsize(lcmd.pty)
+	if err != nil {
+		fmt.Printf("rows(%d)cols(%d) \n", rows, cols)
+		fmt.Printf("ResizeTerminal() error:%s\n", err)
 	}
-	_, _, errno := syscall.Syscall(
-		syscall.SYS_IOCTL,
-		lcmd.pty.Fd(),
-		syscall.TIOCSWINSZ,
-		uintptr(unsafe.Pointer(&window)),
-	)
-	if errno != 0 {
-		return errno
-	} else {
-		return nil
-	}
+	pty.Setsize(lcmd.pty, &pty.Winsize{
+		Rows: uint16(width),
+		Cols: uint16(height),
+		X:    0,
+		Y:    0,
+	})
+	return nil
 }
 
 func (lcmd *LocalCommand) closeTimeoutC() <-chan time.Time {
